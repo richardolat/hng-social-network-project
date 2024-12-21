@@ -26,7 +26,19 @@ jobs:
       run: npm test
       working-directory: ./backend
 
+    - name: Login to Heroku
+      run: echo "${{ secrets.HEROKU_API_KEY }}" | heroku auth:token
+
+    - name: Set up Heroku remote
+      run: heroku git:remote -a hng-social-network
+
+    - name: Initialize Git (if not already initialized)
+      run: |
+        git init
+        git config user.name "github-actions"
+        git config user.email "actions@github.com"
+        git add .
+        git commit -m "Deploy to Heroku" || echo "No changes to commit"
+
     - name: Deploy to Heroku
       run: git push heroku main
-      env:
-        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
