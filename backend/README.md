@@ -11,5 +11,5 @@ This is the backend for the HNG Interns Social Network application. It provides 
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/<your-username>/hng-social-network-backend.git
+   git clone https://github.com/richardolat/hng-social-network-backend.git
    cd hng-social-network-backend
