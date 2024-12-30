@@ -1,4 +1,4 @@
-name: Backend CI/CD
+name: Deploy to AWS S3 Bucket
 
 on:
   push:
@@ -6,39 +6,34 @@ on:
       - main
 
 jobs:
-  test-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16
+      # Step 2: Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-    - name: Install dependencies
-      run: npm install
-      working-directory: ./backend
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
 
-    - name: Run tests
-      run: npm test
-      working-directory: ./backend
+      # Step 4: Package the application
+      - name: Package application
+        run: |
+          zip -r application.zip ./*
 
-    - name: Login to Heroku
-      run: echo "${{ secrets.HEROKU_API_KEY }}" | heroku auth:token
-
-    - name: Set up Heroku remote
-      run: heroku git:remote -a hng-social-network
-
-    - name: Initialize Git (if not already initialized)
-      run: |
-        git init
-        git config user.name "github-actions"
-        git config user.email "actions@github.com"
-        git add .
-        git commit -m "Deploy to Heroku" || echo "No changes to commit"
-
-    - name: Deploy to Heroku
-      run: git push heroku main
+      # Step 5: Deploy to S3
+      - name: Deploy to S3 Bucket
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+        run: |
+          aws s3 cp application.zip s3://your-s3-bucket-name/ --region $AWS_REGION
